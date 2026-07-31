@@ -252,13 +252,15 @@
         display: block;
       }
       .modal-details {
+        position: relative;
+        z-index: 1;
         width: min(100%, var(--modal-surface-width, 760px));
         max-height: min(28dvh, 240px);
         margin: 0 auto;
         overflow-y: auto;
         border-radius: 0 0 1rem 1rem;
-        background: rgba(255, 255, 255, 0.96);
-        box-shadow: 0 14px 44px rgba(0, 0, 0, 0.22);
+        background: #ffffff;
+        box-shadow: none;
         border-top: 4px solid #824e21;
       }
       .modal-details-inner {
