@@ -207,11 +207,18 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        overflow: hidden;
+        overflow: visible;
         padding-inline: clamp(0rem, 4vw, 3.25rem);
       }
       .modal-image-surface {
+        position: relative;
         width: min(100%, var(--modal-surface-width, 760px));
+        height: 100%;
+        min-width: 0;
+        min-height: 0;
+      }
+      .modal-image-clip {
+        width: 100%;
         height: 100%;
         min-width: 0;
         min-height: 0;
@@ -222,6 +229,19 @@
         border-radius: 1rem 1rem 0 0;
         background: #e9e3d6;
         box-shadow: 0 24px 80px rgba(0, 0, 0, 0.38);
+      }
+      .modal-edge-btn {
+        position: absolute;
+        top: 50%;
+        z-index: 2;
+      }
+      .modal-edge-btn--prev {
+        left: 0;
+        transform: translate(-50%, -50%);
+      }
+      .modal-edge-btn--next {
+        right: 0;
+        transform: translate(50%, -50%);
       }
       #modalImg {
         width: auto;
@@ -442,22 +462,24 @@
         </button>
         <div class="modal-media">
           <div class="modal-image-surface">
-            <img id="modalImg" src="" alt="" />
+            <div class="modal-image-clip">
+              <img id="modalImg" src="" alt="" />
+            </div>
+            <button
+              id="prevBtn"
+              aria-label="Previous project"
+              class="modal-nav-btn modal-edge-btn modal-edge-btn--prev"
+            >
+              ‹
+            </button>
+            <button
+              id="nextBtn"
+              aria-label="Next project"
+              class="modal-nav-btn modal-edge-btn modal-edge-btn--next"
+            >
+              ›
+            </button>
           </div>
-          <button
-            id="prevBtn"
-            aria-label="Previous project"
-            class="modal-nav-btn absolute left-3 top-1/2 -translate-y-1/2"
-          >
-            ‹
-          </button>
-          <button
-            id="nextBtn"
-            aria-label="Next project"
-            class="modal-nav-btn absolute right-3 top-1/2 -translate-y-1/2"
-          >
-            ›
-          </button>
         </div>
         <div class="modal-details">
           <div class="modal-details-inner">
