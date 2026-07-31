@@ -798,7 +798,10 @@
         .getElementById("nextBtn")
         .addEventListener("click", () => openModal(current + 1));
       backdrop.addEventListener("click", (e) => {
-        if (e.target === backdrop) closeModal();
+        const clickedInsideContent = e.target.closest?.(
+          ".modal-image-surface, .modal-details, .modal-nav-btn",
+        );
+        if (!clickedInsideContent) closeModal();
       });
       document.addEventListener("keydown", (e) => {
         if (!backdrop.classList.contains("open")) return;
