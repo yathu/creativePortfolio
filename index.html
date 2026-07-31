@@ -285,6 +285,13 @@
         color: #f6f2ea;
       }
       @media (max-width: 640px) {
+        .project-modal {
+          grid-template-rows: auto auto;
+          align-content: center;
+        }
+        .modal-media {
+          height: var(--modal-mobile-media-height, 50dvh);
+        }
         .modal-details {
           max-height: min(32dvh, 220px);
         }
@@ -608,6 +615,7 @@
       const backdrop = document.getElementById("modalBackdrop");
       const projectModal = document.querySelector(".project-modal");
       const modalMedia = document.querySelector(".modal-media");
+      const modalDetails = document.querySelector(".modal-details");
       const modalImg = document.getElementById("modalImg");
       const mCat = document.getElementById("mCat");
       const mTitle = document.getElementById("mTitle");
@@ -615,7 +623,7 @@
       const mDesc = document.getElementById("mDesc");
       let current = 0;
 
-      function updateModalSurfaceWidth() {
+      function updateModalSurfaceSize() {
         if (!backdrop.classList.contains("open")) return;
 
         const p = projects[current];
@@ -624,7 +632,10 @@
           modalMedia.clientWidth -
           parseFloat(mediaStyles.paddingLeft) -
           parseFloat(mediaStyles.paddingRight);
-        const availableHeight = modalMedia.clientHeight;
+        const isMobile = window.matchMedia("(max-width: 640px)").matches;
+        const availableHeight = isMobile
+          ? Math.max(1, projectModal.clientHeight - modalDetails.offsetHeight)
+          : modalMedia.clientHeight;
 
         if (availableWidth <= 0 || availableHeight <= 0) return;
 
@@ -634,6 +645,7 @@
           availableHeight / p.height,
         );
         const renderedImageWidth = p.width * scale;
+        const renderedImageHeight = p.height * scale;
         const readableWidth = Math.min(760, availableWidth);
         const surfaceWidth = Math.max(readableWidth, renderedImageWidth);
 
@@ -641,6 +653,12 @@
           "--modal-surface-width",
           `${Math.ceil(surfaceWidth)}px`,
         );
+        if (isMobile) {
+          projectModal.style.setProperty(
+            "--modal-mobile-media-height",
+            `${Math.ceil(renderedImageHeight)}px`,
+          );
+        }
       }
 
       function openModal(i) {
@@ -658,7 +676,7 @@
         backdrop.classList.add("open");
         backdrop.setAttribute("aria-hidden", "false");
         document.body.style.overflow = "hidden";
-        requestAnimationFrame(updateModalSurfaceWidth);
+        requestAnimationFrame(updateModalSurfaceSize);
       }
       function closeModal() {
         backdrop.classList.remove("open");
@@ -666,7 +684,7 @@
         document.body.style.overflow = "";
       }
 
-      window.addEventListener("resize", updateModalSurfaceWidth);
+      window.addEventListener("resize", updateModalSurfaceSize);
 
       gallery.addEventListener("click", (e) => {
         const card = e.target.closest(".gallery-item");
