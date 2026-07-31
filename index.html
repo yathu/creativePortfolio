@@ -210,6 +210,19 @@
         overflow: hidden;
         padding-inline: clamp(0rem, 4vw, 3.25rem);
       }
+      .modal-image-surface {
+        width: min(100%, var(--modal-surface-width, 760px));
+        height: 100%;
+        min-width: 0;
+        min-height: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        border-radius: 1rem;
+        background: #e9e3d6;
+        box-shadow: 0 24px 80px rgba(0, 0, 0, 0.38);
+      }
       #modalImg {
         width: auto;
         height: auto;
@@ -218,17 +231,20 @@
         object-fit: contain;
         display: block;
         border-radius: 1rem;
-        box-shadow: 0 24px 80px rgba(0, 0, 0, 0.38);
       }
       .modal-details {
-        width: min(100%, 760px);
+        width: min(100%, var(--modal-surface-width, 760px));
         max-height: min(28dvh, 240px);
         margin: 0 auto;
-        padding: 1rem 1.25rem;
         overflow-y: auto;
         border-radius: 1rem;
         background: rgba(255, 255, 255, 0.96);
         box-shadow: 0 14px 44px rgba(0, 0, 0, 0.22);
+      }
+      .modal-details-inner {
+        width: min(100%, 760px);
+        margin: 0 auto;
+        padding: 1rem 1.25rem;
       }
       .modal-nav-btn {
         width: 38px;
@@ -251,6 +267,8 @@
       @media (max-width: 640px) {
         .modal-details {
           max-height: min(32dvh, 220px);
+        }
+        .modal-details-inner {
           padding: 0.9rem 1rem;
         }
       }
@@ -423,7 +441,9 @@
           ✕
         </button>
         <div class="modal-media">
-          <img id="modalImg" src="" alt="" />
+          <div class="modal-image-surface">
+            <img id="modalImg" src="" alt="" />
+          </div>
           <button
             id="prevBtn"
             aria-label="Previous project"
@@ -440,16 +460,18 @@
           </button>
         </div>
         <div class="modal-details">
-          <p
-            id="mCat"
-            class="font-mono text-[11px] uppercase tracking-[0.2em] text-wine mb-1"
-          ></p>
-          <h3 id="mTitle" class="font-display text-3xl md:text-4xl"></h3>
-          <p id="mMeta" class="font-mono text-[11px] text-muted mt-2"></p>
-          <p
-            id="mDesc"
-            class="mt-4 text-[14px] leading-relaxed text-ink/65"
-          ></p>
+          <div class="modal-details-inner">
+            <p
+              id="mCat"
+              class="font-mono text-[11px] uppercase tracking-[0.2em] text-wine mb-1"
+            ></p>
+            <h3 id="mTitle" class="font-display text-3xl md:text-4xl"></h3>
+            <p id="mMeta" class="font-mono text-[11px] text-muted mt-2"></p>
+            <p
+              id="mDesc"
+              class="mt-4 text-[14px] leading-relaxed text-ink/65"
+            ></p>
+          </div>
         </div>
       </div>
     </div>
@@ -562,12 +584,42 @@
       }
 
       const backdrop = document.getElementById("modalBackdrop");
+      const projectModal = document.querySelector(".project-modal");
+      const modalMedia = document.querySelector(".modal-media");
       const modalImg = document.getElementById("modalImg");
       const mCat = document.getElementById("mCat");
       const mTitle = document.getElementById("mTitle");
       const mMeta = document.getElementById("mMeta");
       const mDesc = document.getElementById("mDesc");
       let current = 0;
+
+      function updateModalSurfaceWidth() {
+        if (!backdrop.classList.contains("open")) return;
+
+        const p = projects[current];
+        const mediaStyles = getComputedStyle(modalMedia);
+        const availableWidth =
+          modalMedia.clientWidth -
+          parseFloat(mediaStyles.paddingLeft) -
+          parseFloat(mediaStyles.paddingRight);
+        const availableHeight = modalMedia.clientHeight;
+
+        if (availableWidth <= 0 || availableHeight <= 0) return;
+
+        const scale = Math.min(
+          1,
+          availableWidth / p.width,
+          availableHeight / p.height,
+        );
+        const renderedImageWidth = p.width * scale;
+        const readableWidth = Math.min(760, availableWidth);
+        const surfaceWidth = Math.max(readableWidth, renderedImageWidth);
+
+        projectModal.style.setProperty(
+          "--modal-surface-width",
+          `${Math.ceil(surfaceWidth)}px`,
+        );
+      }
 
       function openModal(i) {
         current = (i + N) % N;
@@ -580,15 +632,19 @@
         mTitle.textContent = p.title;
         mMeta.textContent = `${p.year} — ${p.tools}`;
         mDesc.textContent = p.description;
+        projectModal.style.setProperty("--modal-surface-width", "100%");
         backdrop.classList.add("open");
         backdrop.setAttribute("aria-hidden", "false");
         document.body.style.overflow = "hidden";
+        requestAnimationFrame(updateModalSurfaceWidth);
       }
       function closeModal() {
         backdrop.classList.remove("open");
         backdrop.setAttribute("aria-hidden", "true");
         document.body.style.overflow = "";
       }
+
+      window.addEventListener("resize", updateModalSurfaceWidth);
 
       gallery.addEventListener("click", (e) => {
         const card = e.target.closest(".gallery-item");
